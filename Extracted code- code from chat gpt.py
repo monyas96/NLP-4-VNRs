@@ -3,7 +3,8 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from transformers import pipeline
 import re
-import fitz  # PyMuPDF
+import pandas as pd
+import fitz #PyMuPDF
 
 # Load NER pipeline from Hugging Face transformers
 ner = pipeline("ner")
@@ -25,7 +26,8 @@ def identify_themes(text):
 
 # Function to extract sentences containing numeric findings
 def extract_numeric_sentences(text):
-    sentences = re.split(r'(?<!/w/./w.)(?<![A-Z][a-z]/.)(?<=/.|/?)/s', text)
+    # sentences = re.split(r'(?<!/w/./w.)(?<![A-Z][a-z]/.)(?<=/.|/?)/s', text)
+    sentences = re.split(r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', text)  
     numeric_sentences = [sentence for sentence in sentences if re.search(r'/d+', sentence)]
     return numeric_sentences
 
@@ -62,7 +64,7 @@ def create_bar_chart(data, title):
 # Function to create radial charts for SDG progress
 def create_radial_chart(data, title):
     labels = data['SDG']
-    values = data['Frequency']
+    values = list(data['Frequency'])
     angles = [n / float(len(labels)) * 2 * 3.14 for n in range(len(labels))]
     angles += angles[:1]
     values += values[:1]
@@ -85,7 +87,6 @@ def extract_text_from_pdf(pdf_path):
 
 # Example PDF path
 pdf_path = "C:/Users/MYASSIEN/OneDrive - United Nations/Shared Documents - SMU data team/01. OSAA projects/06.2024_NLP for VNRs/VNRS/Zimbabwe - included - Viz/VNR 2024 Zimbabwe Main Messages.pdf"
-
 
 # Extract text from PDF
 extracted_text = extract_text_from_pdf(pdf_path)
@@ -131,8 +132,11 @@ text_improvement = " ".join([quote for quote, classification, _ in classified_se
 text_challenges = " ".join([quote for quote, classification, _ in classified_sentences if classification == 'Challenge'])
 
 # Create word clouds
-create_word_cloud(text_improvement, "Areas of Improvement")
-create_word_cloud(text_challenges, "Challenges")
+if text_improvement:
+  create_word_cloud(text_improvement, "Areas of Improvement")
+
+if text_challenges:
+  create_word_cloud(text_challenges, "Challenges")
 
 # Sample data for bar chart (assuming aggregated frequency data is available)
 sdg_data = {
